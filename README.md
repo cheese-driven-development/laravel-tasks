@@ -281,3 +281,7 @@ composer test
 ### Security
 
 If you discover any security related issues, please email melting@cheesedriven.dev instead of using the issue tracker.
+
+### Credits
+
+This package is heavily inspired by [BinarCode/laravel-mailator](https://github.com/BinarCode/laravel-mailator). Thanks to [Eduard Lupacescu](https://github.com/binaryk) for the original idea and implementation.
