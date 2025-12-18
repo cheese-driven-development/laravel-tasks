@@ -3,7 +3,6 @@
     "description": "Create and manage scheduled tasks in Laravel.",
     "type": "library",
     "license": "MIT",
-    "version": "1.0.0",
     "autoload": {
         "psr-4": {
             "CheeseDriven\\LaravelTasks\\": "src/"
