@@ -1,0 +1,46 @@
+{
+    "name": "cheese-driven-development/laravel-tasks",
+    "description": "Create and manage scheduled tasks in Laravel.",
+    "type": "library",
+    "license": "MIT",
+    "version": "1.0.0",
+    "autoload": {
+        "psr-4": {
+            "CheeseDriven\\LaravelTasks\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Frank Michel",
+            "email": "gouda@cheesedriven.dev"
+        },
+        {
+            "name": "Benno Eggnauer",
+            "email": "emmentaler@cheesedriven.dev"
+        }
+    ],
+    "require": {
+        "php": "^8.4",
+        "illuminate/support": "^12.0",
+        "illuminate/database": "^12.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^10.0|^11.0|^12.0",
+        "phpunit/phpunit": "^11.0"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "CheeseDriven\\LaravelTasks\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "CheeseDriven\\LaravelTasks\\TaskServiceProvider"
+            ],
+            "aliases": {
+                "Task": "CheeseDriven\\LaravelTasks\\Task"
+            }
+        }
+    }
+}
