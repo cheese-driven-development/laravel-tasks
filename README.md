@@ -48,6 +48,12 @@ Task::init('Send welcome email')
     ->save();
 ```
 
+**A note on unique tasks:**
+
+The `unique()` method is used to set the task to be unique by target, action, mailable and name. This will allow you to call the task multiple times without creating duplicate tasks.
+
+Every mail task will be pushed to the queue via the `SendMailJob` and executed via the `SendMailAction`. The `SendMailJob` will always only be dispatched once - even if the task itself is executed multiple times. This will prevent duplicate jobs from being added to the queue. So only one `SendMailAction` will be executed for a given mail task.
+
 ### Custom Action Task
 
 A custom action task is a task that executes a custom action.
