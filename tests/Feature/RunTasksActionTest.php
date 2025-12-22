@@ -2,10 +2,13 @@
 
 namespace CheeseDriven\LaravelTasks\Tests\Feature;
 
+use CheeseDriven\LaravelTasks\Actions\LogSomethingAction;
 use CheeseDriven\LaravelTasks\Actions\RunTasksAction;
+use CheeseDriven\LaravelTasks\Enums\TaskType;
 use CheeseDriven\LaravelTasks\Models\Task;
 use CheeseDriven\LaravelTasks\Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\LazyCollection;
 use Mockery;
 
 class RunTasksActionTest extends TestCase
@@ -25,9 +28,13 @@ class RunTasksActionTest extends TestCase
     {
         // create tasks - one ready, one already executed
         $readyTask = Task::init('ready-task');
+        $readyTask->type(TaskType::Custom);
+        $readyTask->action(new LogSomethingAction('Test'));
         $readyTask->save();
 
         $executedTask = Task::init('executed-task');
+        $executedTask->type(TaskType::Custom);
+        $executedTask->action(new LogSomethingAction('Test'));
         $executedTask->completed_at = now();
         $executedTask->save();
 
@@ -42,24 +49,39 @@ class RunTasksActionTest extends TestCase
     public function test_run_tasks_action_uses_cursor_for_memory_efficiency(): void
     {
         // create multiple tasks
-        Task::init('task-1')->save();
-        Task::init('task-2')->save();
-        Task::init('task-3')->save();
+        Task::init('task-1')
+            ->type(TaskType::Custom)
+            ->action(new LogSomethingAction('Test'))
+            ->save();
+
+        Task::init('task-2')
+            ->type(TaskType::Custom)
+            ->action(new LogSomethingAction('Test'))
+            ->save();
+
+        Task::init('task-3')
+            ->type(TaskType::Custom)
+            ->action(new LogSomethingAction('Test'))
+            ->save();
 
         // verify cursor is used (this tests the query structure that RunTasksAction uses)
         $query = Task::query()->notCompleted();
 
         // cursor() returns a LazyCollection which is memory efficient
-        $this->assertInstanceOf(\Illuminate\Support\LazyCollection::class, $query->cursor());
+        $this->assertInstanceOf(LazyCollection::class, $query->cursor());
     }
 
     public function test_run_tasks_action_executes_tasks_that_should_run(): void
     {
         // create ready tasks
         $task1 = Task::init('task-1');
+        $task1->type(TaskType::Custom);
+        $task1->action(new LogSomethingAction('Test'));
         $task1->save();
 
         $task2 = Task::init('task-2');
+        $task2->type(TaskType::Custom);
+        $task2->action(new LogSomethingAction('Test'));
         $task2->save();
 
         // verify the action structure is correct
@@ -75,12 +97,18 @@ class RunTasksActionTest extends TestCase
     {
         // create tasks with different states
         $readyTask1 = Task::init('ready-task-1');
+        $readyTask1->type(TaskType::Custom);
+        $readyTask1->action(new LogSomethingAction('Test'));
         $readyTask1->save();
 
         $readyTask2 = Task::init('ready-task-2');
+        $readyTask2->type(TaskType::Custom);
+        $readyTask2->action(new LogSomethingAction('Test'));
         $readyTask2->save();
 
         $executedTask = Task::init('executed-task');
+        $executedTask->type(TaskType::Custom);
+        $executedTask->action(new LogSomethingAction('Test'));
         $executedTask->completed_at = now();
         $executedTask->save();
 

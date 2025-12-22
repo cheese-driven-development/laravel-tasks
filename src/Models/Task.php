@@ -236,8 +236,33 @@ class Task extends Model
         }
     }
 
+    protected function checkRequiredMethodCalls()
+    {
+        if (empty($this->attributes['type'])) {
+            throw new Exception('Type must be set for tasks');
+        }
+
+        if ($this->attributes['type'] === TaskType::Mail->value) {
+            if (empty($this->attributes['mailable'])) {
+                throw new Exception('Mailable must be set for mail tasks');
+            }
+
+            if (empty($this->attributes['recipients']) || count($this->getRecipients()) === 0) {
+                throw new Exception('Recipients must be set for mail tasks');
+            }
+        }
+
+        if ($this->attributes['type'] === TaskType::Custom->value) {
+            if (empty($this->attributes['action'])) {
+                throw new Exception('Action must be set for custom tasks');
+            }
+        }
+    }
+
     public function save(array $options = [])
     {
+        $this->checkRequiredMethodCalls();
+
         if (! $this->isUnique()) {
             return parent::save($options);
         }
