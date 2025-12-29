@@ -302,10 +302,10 @@ class Task extends Model
         }
     }
 
-    public function complete(): void
+    public function complete(string $logMessage = 'Task completed successfully'): void
     {
         if ($this->latest_status !== TaskLogStatus::Success->value) {
-            $this->logSuccess('Task completed successfully');
+            $this->logSuccess($logMessage);
         }
 
         (new TaskCompletedAction)->handle($this);

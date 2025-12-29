@@ -3,11 +3,14 @@
 namespace CheeseDriven\LaravelTasks\Models;
 
 use CheeseDriven\LaravelTasks\Enums\TaskLogStatus;
+use CheeseDriven\LaravelTasks\Support\ClassResolver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Config;
 
 class TaskLog extends Model
 {
+    use ClassResolver;
+
     protected $guarded = [];
 
     protected $casts = [
