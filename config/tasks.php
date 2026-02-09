@@ -1,5 +1,8 @@
 <?php
 
+use CheeseDriven\LaravelTasks\Constraints\OnceConstraint;
+use CheeseDriven\LaravelTasks\Constraints\ScheduledConstraint;
+
 return [
     'tables' => [
         'tasks' => 'tasks',
@@ -14,5 +17,9 @@ return [
     ],
     'queues' => [
         'send_mail' => 'default',
+    ],
+    'default_constraints' => [
+        OnceConstraint::class,
+        ScheduledConstraint::class,
     ],
 ];

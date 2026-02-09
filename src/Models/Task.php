@@ -225,13 +225,21 @@ class Task extends Model
     {
         try {
             if (! $this->passesDefaultConstraints()) {
-                $this->skip('Task skipped due to default constraints');
+                $this->logSkipped('Task skipped due to default constraints');
+
+                if ($this->shouldCompleteOnDefaultConstraintFailure()) {
+                    $this->complete();
+                }
 
                 return false;
             }
 
             if (! $this->passesCustomConstraints()) {
-                $this->skip('Task skipped due to custom constraints');
+                $this->logSkipped('Task skipped due to custom constraints');
+
+                if ($this->shouldCompleteOnCustomConstraintFailure()) {
+                    $this->complete();
+                }
 
                 return false;
             }
@@ -315,15 +323,6 @@ class Task extends Model
     {
         if ($this->latest_status !== TaskLogStatus::Success->value) {
             $this->logSuccess($logMessage);
-        }
-
-        (new TaskCompletedAction)->handle($this);
-    }
-
-    public function skip(string $logMessage = 'Task skipped'): void
-    {
-        if ($this->latest_status !== TaskLogStatus::Skipped->value) {
-            $this->logSkipped($logMessage);
         }
 
         (new TaskCompletedAction)->handle($this);

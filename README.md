@@ -162,10 +162,38 @@ class MyCustomConstraint implements Constraint
     {
         return $task->targetable->isActive();
     }
+
+    public function completeOnSkipped(): bool
+    {
+        return false;
+    }
 }
 ```
 
-In this example, the task will only be executed if the target is active.
+In the above example, the task will only be executed if the target is active. It will not be marked as completed when the constraint fails. So the task will be triggered again with the next task run.
+
+The `completeOnSkipped` method is used to determine if the task should be marked as completed when the constraint fails. If true, the task will be completed instead of skipped when the constraint fails.
+
+```php
+namespace App\Constraints;
+
+use CheeseDriven\LaravelTasks\Contracts\Constraint;
+
+class MyCustomConstraint implements Constraint
+{
+    public function shouldRun(Task $task): bool
+    {
+        // ... your custom constraint logic here ...
+    }
+
+    public function completeOnSkipped(): bool
+    {
+        return true;
+    }
+}
+```
+
+For example if a model is deleted, it doesn't make sense to run the task again. So you can mark the task as completed when the constraint fails.
 
 You can add multiple constraints to a task by using the `constraint(Constraint $constraint)` method multiple times.
 

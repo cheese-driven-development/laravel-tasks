@@ -14,4 +14,9 @@ class DoNotRunConstraint implements Constraint
     {
         return false;
     }
+
+    public function completeOnSkipped(): bool
+    {
+        return true;
+    }
 }
