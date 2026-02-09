@@ -141,6 +141,11 @@ class Task extends Model
         return $this->log(TaskLogStatus::Failed, $exception);
     }
 
+    public function logSkipped(?string $message = null): self
+    {
+        return $this->log(TaskLogStatus::Skipped, $message);
+    }
+
     public function getRecipients(): array
     {
         return collect($this->recipients)
@@ -220,10 +225,14 @@ class Task extends Model
     {
         try {
             if (! $this->passesDefaultConstraints()) {
+                $this->skip('Task skipped due to default constraints');
+
                 return false;
             }
 
             if (! $this->passesCustomConstraints()) {
+                $this->skip('Task skipped due to custom constraints');
+
                 return false;
             }
 
@@ -306,6 +315,15 @@ class Task extends Model
     {
         if ($this->latest_status !== TaskLogStatus::Success->value) {
             $this->logSuccess($logMessage);
+        }
+
+        (new TaskCompletedAction)->handle($this);
+    }
+
+    public function skip(string $logMessage = 'Task skipped'): void
+    {
+        if ($this->latest_status !== TaskLogStatus::Skipped->value) {
+            $this->logSkipped($logMessage);
         }
 
         (new TaskCompletedAction)->handle($this);

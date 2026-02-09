@@ -4,6 +4,7 @@ namespace CheeseDriven\LaravelTasks\Tests\Feature;
 
 use CheeseDriven\LaravelTasks\Actions\LogSomethingAction;
 use CheeseDriven\LaravelTasks\Constraints\ModelNotDeletedConstraint;
+use CheeseDriven\LaravelTasks\Enums\TaskLogStatus;
 use CheeseDriven\LaravelTasks\Enums\TaskType;
 use CheeseDriven\LaravelTasks\Models\Task;
 use CheeseDriven\LaravelTasks\Tests\TestCase;
@@ -91,6 +92,36 @@ class ModelNotDeletedConstraintTest extends TestCase
         $this->assertFalse($constraint->shouldRun($task));
         $this->assertFalse($task->passesCustomConstraints());
         $this->assertDatabaseMissing('non_soft_deletable_models', ['id' => $model->id]);
+    }
+
+    public function test_skip_method_is_called_when_constraint_fails(): void
+    {
+        $model = new SoftDeletableModel;
+        $model->name = 'Test Model';
+        $model->save();
+
+        $task = Task::init('test-task');
+        $task->type(TaskType::Custom);
+        $task->action(new LogSomethingAction('Test'));
+        $task->constraint(new ModelNotDeletedConstraint($model));
+        $task->save();
+
+        // delete the model so the constraint will fail
+        $model->delete();
+
+        // call shouldRun() which should trigger skip() when constraint fails
+        $shouldRun = $task->shouldRun();
+
+        // task should not run because constraint failed
+        $this->assertFalse($shouldRun);
+
+        // task should have a skipped status log
+        $task->refresh();
+        $this->assertEquals(TaskLogStatus::Skipped->value, $task->latest_status);
+        $this->assertTrue($task->logs()->where('status', TaskLogStatus::Skipped->value)->exists());
+
+        // task should be marked as completed
+        $this->assertNotNull($task->completed_at);
     }
 }
 
