@@ -14,4 +14,9 @@ class OnceConstraint implements Constraint
     {
         return is_null($task->completed_at);
     }
+
+    public function completeOnSkipped(): bool
+    {
+        return false;
+    }
 }

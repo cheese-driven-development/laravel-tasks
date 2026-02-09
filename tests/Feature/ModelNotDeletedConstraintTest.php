@@ -115,13 +115,36 @@ class ModelNotDeletedConstraintTest extends TestCase
         // task should not run because constraint failed
         $this->assertFalse($shouldRun);
 
-        // task should have a skipped status log
+        // task should have a skipped status log, latest status should be success
         $task->refresh();
-        $this->assertEquals(TaskLogStatus::Skipped->value, $task->latest_status);
         $this->assertTrue($task->logs()->where('status', TaskLogStatus::Skipped->value)->exists());
+        $this->assertEquals(TaskLogStatus::Success->value, $task->latest_status);
 
         // task should be marked as completed
         $this->assertNotNull($task->completed_at);
+    }
+
+    public function test_task_is_not_completed_when_scheduled_constraint_failed(): void
+    {
+        $task = Task::init('test-task');
+        $task->type(TaskType::Custom);
+        $task->action(new LogSomethingAction('Test'));
+        $task->scheduleAt(now()->addHour());
+        $task->save();
+
+        // call shouldRun() which should trigger skip() when constraint fails
+        $shouldRun = $task->shouldRun();
+
+        // task should not run because constraint failed
+        $this->assertFalse($shouldRun);
+
+        // task should have a skipped status log, latest status should be skipped
+        $task->refresh();
+        $this->assertTrue($task->logs()->where('status', TaskLogStatus::Skipped->value)->exists());
+        $this->assertEquals(TaskLogStatus::Skipped->value, $task->latest_status);
+
+        // task should not be completed
+        $this->assertNull($task->completed_at);
     }
 }
 

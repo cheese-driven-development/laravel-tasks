@@ -29,4 +29,9 @@ class ModelNotDeletedConstraint implements Constraint
 
         return true;
     }
+
+    public function completeOnSkipped(): bool
+    {
+        return true;
+    }
 }

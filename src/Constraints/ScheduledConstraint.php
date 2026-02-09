@@ -15,4 +15,9 @@ class ScheduledConstraint implements Constraint
 
         return $task->scheduled_at->isPast();
     }
+
+    public function completeOnSkipped(): bool
+    {
+        return false;
+    }
 }
