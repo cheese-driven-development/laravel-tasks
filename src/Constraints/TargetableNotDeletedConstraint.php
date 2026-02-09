@@ -4,6 +4,7 @@ namespace CheeseDriven\LaravelTasks\Constraints;
 
 use CheeseDriven\LaravelTasks\Contracts\Constraint;
 use CheeseDriven\LaravelTasks\Models\Task;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class TargetableNotDeletedConstraint implements Constraint
 {
@@ -17,7 +18,11 @@ class TargetableNotDeletedConstraint implements Constraint
             return false;
         }
 
-        $task->targetable->refresh();
+        try {
+            $task->targetable->refresh();
+        } catch (ModelNotFoundException $e) {
+            return false;
+        }
 
         if ($task->targetable->isSoftDeletable()) {
             return ! $task->targetable->trashed();

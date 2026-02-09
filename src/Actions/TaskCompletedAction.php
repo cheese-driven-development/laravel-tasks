@@ -22,6 +22,9 @@ class TaskCompletedAction implements Action
             return false;
         }
 
-        return $task->logs()->where('status', TaskLogStatus::Success->value)->exists();
+        return $task->logs()->whereIn('status', [
+            TaskLogStatus::Success->value,
+            TaskLogStatus::Skipped->value,
+        ])->exists();
     }
 }
