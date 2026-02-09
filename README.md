@@ -172,7 +172,7 @@ class MyCustomConstraint implements Constraint
 
 In the above example, the task will only be executed if the target is active. It will not be marked as completed when the constraint fails. So the task will be triggered again with the next task run.
 
-The `completeOnSkipped` method is used to determine if the task should be marked as completed when the constraint fails. If true, the task will be completed instead of skipped when the constraint fails.
+The `completeOnSkipped` method is used to determine if the task should be marked as completed when the constraint fails. If true, the task will be completed after the task is skipped when the constraint fails.
 
 ```php
 namespace App\Constraints;
@@ -306,9 +306,20 @@ $schedule->command(RunTasksCommand::class)->everyMinute();
 $schedule->command(RunTasksCommand::class)->everyFiveMinutes();
 ```
 
+### Upgrade Guide
+
+#### From v.1.0.6-alpha to v.1.0.7-alpha
+
+- Custom constraints need to implement the `completeOnSkipped` method.
+- Republish the migrations to add the `skipped` status to the tasks table.
+
+```php
+php artisan vendor:publish --provider="CheeseDriven\LaravelTasks\TaskServiceProvider" --tag="laravel-tasks-migrations"
+```
+
 ### Testing
 
-``` bash
+```bash
 composer test
 ```
 
