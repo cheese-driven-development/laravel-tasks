@@ -116,6 +116,10 @@ class Task extends Model
 
     public function log(TaskLogStatus $status, ?string $message = null): self
     {
+        if ($this->latest_status === $status->value) {
+            return $this;
+        }
+
         $this->logs()->create([
             'status' => $status->value,
             'message' => $message,
@@ -225,7 +229,12 @@ class Task extends Model
     {
         try {
             if (! $this->passesDefaultConstraints()) {
-                $this->logSkipped('Task skipped due to default constraints');
+
+                // only log "skipped" status if the task is not scheduled or the scheduled time
+                // is in the past, in order to keep the "scheduled" status for future tasks
+                if (empty($this->scheduled_at) || $this->scheduled_at->isPast()) {
+                    $this->logSkipped('Task skipped due to default constraints');
+                }
 
                 if ($this->shouldCompleteOnDefaultConstraintFailure()) {
                     $this->complete();

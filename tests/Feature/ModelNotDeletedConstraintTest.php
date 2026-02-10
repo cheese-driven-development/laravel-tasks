@@ -138,12 +138,14 @@ class ModelNotDeletedConstraintTest extends TestCase
         // task should not run because constraint failed
         $this->assertFalse($shouldRun);
 
-        // task should have a skipped status log, latest status should be skipped
+        // task should have a pending status log, latest status should be pending
         $task->refresh();
-        $this->assertTrue($task->logs()->where('status', TaskLogStatus::Skipped->value)->exists());
-        $this->assertEquals(TaskLogStatus::Skipped->value, $task->latest_status);
+
+        // task logs should be empty
+        $this->assertCount(0, $task->logs);
 
         // task should not be completed
+        $this->assertNull($task->latest_status);
         $this->assertNull($task->completed_at);
     }
 }

@@ -41,11 +41,5 @@ class TaskServiceProvider extends ServiceProvider
                 __DIR__.'/../database/migrations/create_tasks_tables.stub.php' => database_path('migrations/'.date('Y_m_d_His', now()->subMinute()->timestamp).'_create_tasks_tables.php'),
             ], 'laravel-tasks-migrations');
         }
-
-        if (empty(glob(database_path('migrations').'/*_add_skipped_status_to_tasks_tables.php'))) {
-            $this->publishes([
-                __DIR__.'/../database/migrations/add_skipped_status_to_tasks_tables.stub.php' => database_path('migrations/'.date('Y_m_d_His', now()->subMinute()->timestamp).'_add_skipped_status_to_tasks_tables.php'),
-            ], 'laravel-tasks-migrations');
-        }
     }
 }
