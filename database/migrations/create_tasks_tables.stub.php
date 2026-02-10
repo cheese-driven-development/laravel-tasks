@@ -25,14 +25,14 @@ return new class extends Migration
             $table->unsignedBigInteger('targetable_id')->nullable();
             $table->timestamp('scheduled_at')->nullable();
             $table->timestamp('completed_at')->nullable();
-            $table->enum('latest_status', TaskLogStatus::values())->nullable();
+            $table->string('latest_status')->nullable();
             $table->timestamps();
         });
 
         Schema::create(config('tasks.tables.logs', 'task_logs'), function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('task_id');
-            $table->enum('status', TaskLogStatus::values())->default(TaskLogStatus::Pending->value);
+            $table->string('status')->default(TaskLogStatus::Pending->value);
             $table->text('message')->nullable();
             $table->timestamps();
 

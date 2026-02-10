@@ -308,6 +308,42 @@ $schedule->command(RunTasksCommand::class)->everyFiveMinutes();
 
 ### Upgrade Guide
 
+#### From v.1.0.7-alpha to v.1.1.0-alpha
+
+This release eliminates the use of enums for the `latest_status` and `status` columns for wider database support and future compatibility. You should manually migrate the fields to the new data type to avoid breaking changes in the future (if new statuses are added).
+
+To do this, you should create a new migration in your project:
+
+```php
+php artisan make:migration change_latest_status_and_status_to_string --table=tasks
+```
+
+and add the following code to the migration:
+
+```php
+use CheeseDriven\LaravelTasks\Enums\TaskLogStatus;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('tasks', function (Blueprint $table) {
+            $table->string('latest_status')->nullable()->change();
+        });
+
+        Schema::table('task_logs', function (Blueprint $table) {
+            $table->string('status')->default(TaskLogStatus::Pending->value)->change();
+        });
+    }
+};
+```
+
 #### From v.1.0.6-alpha to v.1.0.7-alpha
 
 - Custom constraints need to implement the `completeOnSkipped` method.

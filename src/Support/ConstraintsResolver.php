@@ -5,7 +5,6 @@ namespace CheeseDriven\LaravelTasks\Support;
 use CheeseDriven\LaravelTasks\Constraints\OnceConstraint;
 use CheeseDriven\LaravelTasks\Constraints\ScheduledConstraint;
 use CheeseDriven\LaravelTasks\Contracts\Constraint;
-use Illuminate\Support\Facades\Config;
 
 trait ConstraintsResolver
 {
@@ -16,10 +15,10 @@ trait ConstraintsResolver
      */
     protected function getDefaultConstraintClasses(): array
     {
-        return Config::get('tasks.default_constraints', [
+        return [
             OnceConstraint::class,
             ScheduledConstraint::class,
-        ]);
+        ];
     }
 
     /**
