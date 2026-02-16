@@ -9,13 +9,19 @@ use Illuminate\Support\Str;
 
 class ListTasksCommand extends Command
 {
-    protected $signature = 'tasks:list';
+    protected $signature = 'tasks:list {--all : Include all tasks, including successful runs}';
 
     protected $description = 'List the tasks.';
 
     public function handle(): int
     {
-        $tasks = Task::all();
+        $tasks = Task::query();
+
+        if (! $this->option('all')) {
+            $tasks->where('latest_status', '!=', TaskLogStatus::Success->value)->orWhereNull('latest_status');
+        }
+
+        $tasks = $tasks->get();
 
         $this->table(['ID', 'Name', 'Type', 'Created At', 'Scheduled At', 'Status', 'Runs'], $tasks->map(fn (Task $task) => [
             $task->id,

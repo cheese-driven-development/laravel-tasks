@@ -263,10 +263,16 @@ protected function schedule(Schedule $schedule): void
 
 ### `tasks:list`
 
-Lists all tasks with their status, type, and scheduled execution time:
+Lists tasks with their status, type, and scheduled execution time. By default, it only lists tasks that have not been executed successfully yet:
 
 ```bash
 php artisan tasks:list
+```
+
+To include all tasks, including successful runs:
+
+```bash
+php artisan tasks:list --all
 ```
 
 ### `tasks:prune`
