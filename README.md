@@ -128,9 +128,27 @@ class ProcessOrderAction implements Action
 {
     public function handle(Task $task)
     {
-        // ... your custom action logic here ...
+        try {
+            // ... your custom action logic here ...
+
+            $task->complete();
+        } catch (Exception $e) {
+            $task->logFailure($e->getMessage());
+            return;
+        }
     }
 }
+```
+
+Do NOT forget to complete the task if it was successful. Otherwise the task will be executed again on the next run.
+```php
+$task->complete();
+```
+
+You can also complete the task with a custom log message:
+
+```php
+$task->complete('Order processed successfully');
 ```
 
 ### Custom Constraints
