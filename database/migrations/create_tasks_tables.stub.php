@@ -25,6 +25,7 @@ return new class extends Migration
             $table->unsignedBigInteger('targetable_id')->nullable();
             $table->timestamp('scheduled_at')->nullable();
             $table->timestamp('completed_at')->nullable();
+            $table->unsignedInteger('attempts')->default(0);
             $table->string('latest_status')->nullable();
             $table->timestamps();
         });

@@ -44,6 +44,7 @@ class Task extends Model
         'constraints' => 'array',
         'scheduled_at' => 'datetime',
         'completed_at' => 'datetime',
+        'attempts' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -142,7 +143,29 @@ class Task extends Model
 
     public function logFailure(string $exception): self
     {
-        return $this->log(TaskLogStatus::Failed, $exception);
+        $this->log(TaskLogStatus::Failed, $exception);
+
+        $this->incrementAttemptsAndFailPermanentlyIfNeeded();
+
+        return $this;
+    }
+
+    public function logExhausted(?string $message = null): self
+    {
+        return $this->log(
+            TaskLogStatus::Exhausted,
+            $message ?? "Stopped after {$this->attempts} failed attempts"
+        );
+    }
+
+    public function failPermanently(?string $message = null): self
+    {
+        $this->logExhausted($message);
+
+        $this->completed_at = now();
+        $this->save();
+
+        return $this;
     }
 
     public function logSkipped(?string $message = null): self
@@ -335,5 +358,24 @@ class Task extends Model
         }
 
         (new TaskCompletedAction)->handle($this);
+    }
+
+    protected function incrementAttemptsAndFailPermanentlyIfNeeded(): void
+    {
+        if ($this->completed_at !== null) {
+            return;
+        }
+
+        $this->increment('attempts');
+
+        $maxAttempts = Config::get('tasks.max_attempts', 3);
+
+        if ($maxAttempts === null) {
+            return;
+        }
+
+        if ($this->attempts >= (int) $maxAttempts) {
+            $this->failPermanently();
+        }
     }
 }
