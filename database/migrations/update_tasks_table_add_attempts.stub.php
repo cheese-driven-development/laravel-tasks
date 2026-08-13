@@ -18,7 +18,7 @@ return new class extends Migration
         }
 
         Schema::table($table, function (Blueprint $table) {
-            $table->unsignedInteger('attempts')->default(0);
+            $table->unsignedInteger('attempts')->default(0)->after('latest_status');
         });
     }
 
