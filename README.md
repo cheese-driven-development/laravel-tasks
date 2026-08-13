@@ -140,7 +140,7 @@ class ProcessOrderAction implements Action
 }
 ```
 
-Do NOT forget to complete the task if it was successful. Otherwise the task will be executed again on the next run.
+Do NOT forget to complete the task if it was successful. Otherwise the task will be executed again on the next run, until it succeeds or reaches the failed-attempt limit.
 ```php
 $task->complete();
 ```
@@ -251,6 +251,18 @@ Tasks are executed by the `tasks:run` command. This command should be scheduled 
 
 If a task has no scheduled execution time, it will be executed immediately.
 
+### Failed attempts
+
+Failed tasks are retried on each `tasks:run` until they succeed. After **3** failed attempts (configurable), the task is marked as `exhausted`, `completed_at` is set, and it will not run again.
+
+Constraint skips do not count as failed attempts.
+
+You can change the limit in `config/tasks.php`:
+
+```php
+'max_attempts' => 3, // null = retry forever
+```
+
 ### Seeding Sample Tasks
 
 To see examples of how tasks work, you can seed some sample tasks:
@@ -332,7 +344,24 @@ $schedule->command(RunTasksCommand::class)->everyFiveMinutes();
 
 ### Upgrade Guide
 
-#### From v.1.0.7-alpha to v.1.1.0-alpha
+#### From v1.1.2-alpha to v1.2.0-alpha
+
+Existing installations need an `attempts` column on the tasks table. Publish and run the package migrations:
+
+```bash
+php artisan vendor:publish --provider="CheeseDriven\LaravelTasks\TaskServiceProvider" --tag="laravel-tasks-migrations"
+php artisan migrate
+```
+
+Or add the column yourself:
+
+```php
+Schema::table('tasks', function (Blueprint $table) {
+    $table->unsignedInteger('attempts')->default(0);
+});
+```
+
+#### From v1.0.7-alpha to v1.1.0-alpha
 
 This release eliminates the use of enums for the `latest_status` and `status` columns for wider database support and future compatibility. You should manually migrate the fields to the new data type to avoid breaking changes in the future (if new statuses are added).
 
@@ -368,7 +397,7 @@ return new class extends Migration
 };
 ```
 
-#### From v.1.0.6-alpha to v.1.0.7-alpha
+#### From v1.0.6-alpha to v1.0.7-alpha
 
 - Custom constraints need to implement the `completeOnSkipped` method.
 - Republish the migrations to add the `skipped` status to the tasks table.
