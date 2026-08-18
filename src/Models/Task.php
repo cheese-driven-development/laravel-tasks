@@ -16,13 +16,13 @@ use Illuminate\Contracts\Mail\Mailable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\RelationNotFoundException;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
-use TypeError;
 
 class Task extends Model
 {
@@ -184,11 +184,29 @@ class Task extends Model
     {
         try {
             return unserialize($this->mailable);
-        } catch (Throwable|TypeError $e) {
-            $this->logFailure($e->getMessage());
+        } catch (RelationNotFoundException) {
+            try {
+                return unserialize($this->mailableWithoutRelations());
+            } catch (Throwable $exception) {
+                $this->logFailure($exception->getMessage());
+            }
+        } catch (Throwable $exception) {
+            $this->logFailure($exception->getMessage());
         }
 
         return null;
+    }
+
+    /**
+     * Drop stored relation names so Laravel reloads the model by class and id only.
+     */
+    protected function mailableWithoutRelations(): string
+    {
+        return preg_replace(
+            '/s:9:"relations";a:\d+:\{[^}]*\}/',
+            's:9:"relations";a:0:{}',
+            $this->mailable,
+        ) ?? $this->mailable;
     }
 
     protected function ensureValidEmail(string $email): bool
